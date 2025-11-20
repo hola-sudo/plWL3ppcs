@@ -20,25 +20,10 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        slate: {
-                            50: '#f8fafc', // Background
-                            100: '#f1f5f9',
-                            800: '#1e293b', // Primary Text
-                            900: '#0f172a', // Headlines
-                        },
-                        primary: {
-                            DEFAULT: '#1E40AF', // Blue-800
-                            light: '#3B82F6',
-                        },
-                        glass: 'rgba(255, 255, 255, 0.7)',
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'glow': '0 0 15px rgba(59, 130, 246, 0.15)',
+                        slate: { 850: '#1e293b', 900: '#0f172a' },
+                        primary: { DEFAULT: '#2563eb', hover: '#1d4ed8' } // Blue-600
                     }
                 }
             }
@@ -46,284 +31,203 @@
     </script>
 
     <style>
-        /* Custom aesthetic overrides */
-        body {
-            background-color: #f4f5f7; /* Premium paper feel */
-            color: #1e293b;
-            -webkit-font-smoothing: antialiased;
-        }
+        body { background-color: #f1f5f9; color: #0f172a; } /* Slate-100 bg */
+        .btn-action { @apply px-3 py-1.5 rounded-md text-xs font-medium transition-colors border; }
+        .input-edit { @apply w-full px-2 py-1 border border-blue-300 rounded bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none; }
         
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+        /* Utility classes for dense layout */
+        .cell-padding { @apply px-4 py-3; }
+        
+        /* Loading spinner */
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
         }
-
-        .fade-enter {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        .fade-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .step-active {
-            @apply border-blue-600 text-blue-600 bg-blue-50;
-        }
-        .step-completed {
-            @apply border-emerald-500 text-emerald-500 bg-emerald-50;
-        }
-        .step-inactive {
-            @apply border-gray-200 text-gray-400;
-        }
-
-        /* Loading animations */
-        .loading-dots::after {
-            content: '';
-            animation: loading-dots 2s infinite;
-        }
-        @keyframes loading-dots {
-            0%, 20% { content: ''; }
-            40% { content: '.'; }
-            60% { content: '..'; }
-            80%, 100% { content: '...'; }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex text-sm">
-    <!-- SIDEBAR: The Anchor -->
-    <aside class="w-20 lg:w-64 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col justify-between transition-all duration-300 z-20">
-        <div>
-            <!-- Logo Area -->
-            <div class="h-20 flex items-center justify-center lg:justify-start lg:px-8 border-b border-gray-50">
-                <div class="w-8 h-8 bg-gradient-to-tr from-blue-700 to-violet-600 rounded-lg shadow-glow flex items-center justify-center text-white">
-                    <i class="ph-bold ph-cube text-xl"></i>
-                </div>
-                <span class="hidden lg:block ml-3 font-semibold tracking-tight text-slate-800">3D Pixel Perfection</span>
-            </div>
+<body class="h-screen flex overflow-hidden">
 
-            <!-- Navigation -->
-            <nav class="mt-8 px-4 space-y-2">
-                <a href="#" onclick="router('dashboard')" class="nav-item group flex items-center px-3 py-3 text-slate-500 hover:bg-slate-50 hover:text-primary rounded-xl transition-colors active-nav" id="nav-dashboard">
-                    <i class="ph ph-squares-four text-xl"></i>
-                    <span class="hidden lg:block ml-3 font-medium">Dashboard</span>
-                </a>
-                <a href="#" onclick="router('clients')" class="nav-item group flex items-center px-3 py-3 text-slate-500 hover:bg-slate-50 hover:text-primary rounded-xl transition-colors" id="nav-clients">
-                    <i class="ph ph-users text-xl"></i>
-                    <span class="hidden lg:block ml-3 font-medium">Clientes</span>
-                </a>
-                <a href="#" class="nav-item group flex items-center px-3 py-3 text-slate-500 hover:bg-slate-50 hover:text-primary rounded-xl transition-colors" id="nav-contracts">
-                    <i class="ph ph-file-text text-xl"></i>
-                    <span class="hidden lg:block ml-3 font-medium">Contratos</span>
-                </a>
-                <a href="#" class="nav-item group flex items-center px-3 py-3 text-slate-500 hover:bg-slate-50 hover:text-primary rounded-xl transition-colors" id="nav-metrics">
-                    <i class="ph ph-chart-line-up text-xl"></i>
-                    <span class="hidden lg:block ml-3 font-medium">Métricas</span>
-                </a>
-            </nav>
+    <!-- 1. SIDEBAR: Mínimo y Funcional -->
+    <aside class="w-16 md:w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 transition-all duration-300">
+        <div class="h-14 flex items-center justify-center md:justify-start md:px-6 border-b border-slate-800">
+            <i class="ph-fill ph-cube text-blue-500 text-xl"></i>
+            <span class="hidden md:block ml-3 font-bold tracking-wide text-sm">LEGAL OS</span>
         </div>
 
-        <div class="p-4 border-t border-gray-50">
-            <div class="flex items-center p-2 rounded-xl hover:bg-slate-50 cursor-pointer">
-                <img src="https://ui-avatars.com/api/?name=3D+Pixel&background=1e293b&color=fff" class="w-8 h-8 rounded-full" alt="Profile">
-                <div class="hidden lg:block ml-3">
-                    <p class="text-xs font-semibold text-slate-800">3D Pixel</p>
-                    <p class="text-[10px] text-slate-400">Legal System</p>
+        <nav class="flex-1 py-4 space-y-1 px-2">
+            <button onclick="switchView('dashboard')" class="nav-btn w-full flex items-center p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors group active-nav" id="btn-dashboard">
+                <i class="ph ph-squares-four text-xl"></i>
+                <span class="hidden md:block ml-3 text-sm font-medium">Dashboard</span>
+            </button>
+            <button onclick="switchView('clients')" class="nav-btn w-full flex items-center p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors group" id="btn-clients">
+                <i class="ph ph-users text-xl"></i>
+                <span class="hidden md:block ml-3 text-sm font-medium">Clientes</span>
+            </button>
+            <button onclick="switchView('contracts')" class="nav-btn w-full flex items-center p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors group" id="btn-contracts">
+                <i class="ph ph-files text-xl"></i>
+                <span class="hidden md:block ml-3 text-sm font-medium">Contratos</span>
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-800">
+            <div class="flex items-center justify-center md:justify-start">
+                <div class="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-xs font-bold">JI</div>
+                <div class="hidden md:block ml-3">
+                    <p class="text-xs font-medium text-white">J. Ive</p>
+                    <p class="text-[10px] text-slate-400">Admin</p>
                 </div>
             </div>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT: The Canvas -->
-    <main class="flex-1 flex flex-col relative overflow-hidden">
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
         
-        <!-- Top Bar: Search & Notifications -->
-        <header class="h-20 glass-panel flex items-center justify-between px-8 z-10 sticky top-0">
-            <div class="flex-1 max-w-xl">
-                <div class="relative group">
-                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors"></i>
-                    <input type="text" 
-                           id="global-search"
-                           placeholder="Buscar cliente, RFC o proyecto..." 
-                           class="w-full bg-slate-100/50 border border-transparent focus:bg-white focus:border-blue-100 focus:ring-4 focus:ring-blue-50/50 rounded-xl py-2.5 pl-10 pr-4 text-slate-700 placeholder-slate-400 outline-none transition-all duration-300">
+        <!-- 2. HEADER: Acción Directa -->
+        <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shadow-sm z-10">
+            <!-- Global Search -->
+            <div class="flex-1 max-w-2xl">
+                <div class="relative">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="global-search" 
+                           placeholder="Comando + K para buscar cliente, RFC o proyecto..." 
+                           class="w-full pl-10 pr-4 py-1.5 bg-slate-100 border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-md text-sm transition-all outline-none">
                 </div>
             </div>
-            <div class="flex items-center space-x-4 ml-4">
-                <button class="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                    <i class="ph ph-bell text-xl"></i>
-                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
-                <div class="h-4 w-px bg-gray-200"></div>
-                <span id="system-status-indicator" class="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
-                    Verificando...
+            
+            <!-- Top Actions -->
+            <div class="ml-4 flex items-center space-x-3">
+                <span id="system-status-indicator" class="hidden md:flex items-center px-2 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-medium border border-emerald-100">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span> Verificando...
                 </span>
+                <button onclick="createNewClient()" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-md text-sm font-medium flex items-center shadow-sm transition-colors">
+                    <i class="ph-bold ph-plus mr-1.5"></i> <span class="hidden sm:inline">Nuevo Cliente</span>
+                </button>
             </div>
         </header>
 
-        <!-- CONTENT SCROLL AREA -->
-        <div id="main-viewport" class="flex-1 overflow-y-auto p-8 pb-24">
+        <!-- SCROLLABLE AREA -->
+        <div class="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-6">
 
             <!-- VIEW: DASHBOARD -->
-            <div id="view-dashboard" class="view-section fade-enter-active">
-                <h1 class="text-2xl font-light text-slate-900 mb-1">Sistema Legal 3D Pixel Perfection</h1>
-                <p class="text-slate-500 mb-8 font-light">Dashboard operativo en tiempo real.</p>
-
-                <!-- Metrics Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                    <!-- Metric 1: Clientes Activos -->
-                    <div class="bg-white p-6 rounded-2xl shadow-soft hover:shadow-lg transition-shadow duration-300 group cursor-default">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-2 bg-blue-50 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                <i class="ph ph-users-three text-xl"></i>
+            <div id="view-dashboard" class="space-y-6">
+                <!-- Metrics Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 uppercase">Clientes Activos</p>
+                                <h3 class="text-2xl font-bold text-slate-800 mt-1" data-metric="active-clients">0</h3>
                             </div>
-                            <span class="text-emerald-500 text-xs font-medium flex items-center">
-                                <span id="clients-trend">+0%</span> <i class="ph ph-arrow-up-right ml-1"></i>
-                            </span>
+                            <span class="text-emerald-600 text-xs font-medium bg-emerald-50 px-1.5 py-0.5 rounded" id="clients-trend">+0%</span>
                         </div>
-                        <h3 class="text-3xl font-semibold text-slate-800 mb-1" id="total-clients">0</h3>
-                        <p class="text-slate-400 text-xs">Clientes Activos</p>
                     </div>
-
-                    <!-- Metric 2: Contratos Pendientes -->
-                    <div class="bg-white p-6 rounded-2xl shadow-soft hover:shadow-lg transition-shadow duration-300 group cursor-default">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-2 bg-violet-50 rounded-lg text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors">
-                                <i class="ph ph-file-text text-xl"></i>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 uppercase">Contratos Pendientes</p>
+                                <h3 class="text-2xl font-bold text-slate-800 mt-1" data-metric="pending-contracts">0</h3>
                             </div>
-                            <span class="text-amber-500 text-xs font-medium flex items-center">
-                                <span id="contracts-trend">+0</span> <i class="ph ph-clock ml-1"></i>
-                            </span>
+                            <span class="text-amber-600 text-xs font-medium bg-amber-50 px-1.5 py-0.5 rounded">Atención</span>
                         </div>
-                        <h3 class="text-3xl font-semibold text-slate-800 mb-1" id="pending-contracts">0</h3>
-                        <p class="text-slate-400 text-xs">Contratos Pendientes</p>
                     </div>
-
-                     <!-- Metric 3: Generados Hoy -->
-                     <div class="bg-white p-6 rounded-2xl shadow-soft hover:shadow-lg transition-shadow duration-300 group cursor-default">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                <i class="ph ph-check-circle text-xl"></i>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 uppercase">Vencimientos (48h)</p>
+                                <h3 class="text-2xl font-bold text-slate-800 mt-1" data-metric="upcoming-deadlines">0</h3>
                             </div>
-                            <span class="text-emerald-500 text-xs font-medium">
-                                Hoy
-                            </span>
+                            <span class="text-red-600 text-xs font-medium bg-red-50 px-1.5 py-0.5 rounded">Urgente</span>
                         </div>
-                        <h3 class="text-3xl font-semibold text-slate-800 mb-1" id="generated-today">0</h3>
-                        <p class="text-slate-400 text-xs">Docs Generados</p>
                     </div>
-
-                    <!-- Metric 4: Estado del Sistema -->
-                    <div class="bg-white p-6 rounded-2xl shadow-soft hover:shadow-lg transition-shadow duration-300 group cursor-default">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-2 bg-amber-50 rounded-lg text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                                <i class="ph ph-clock-countdown text-xl"></i>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-slate-500 uppercase">Tasa Finalización</p>
+                                <h3 class="text-2xl font-bold text-slate-800 mt-1" data-metric="completion-rate">98%</h3>
                             </div>
+                            <i class="ph-fill ph-trend-up text-blue-500"></i>
                         </div>
-                        <h3 class="text-3xl font-semibold text-slate-800 mb-1" id="system-uptime">--</h3>
-                        <p class="text-slate-400 text-xs">Uptime del Sistema</p>
                     </div>
                 </div>
 
-                <!-- Recent Activity / Quick Actions -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Recent Activity List -->
-                    <div class="lg:col-span-2 bg-white rounded-3xl shadow-soft p-8">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-lg font-medium text-slate-800">Actividad Reciente</h2>
-                            <button class="text-primary text-xs font-medium hover:underline" onclick="router('clients')">Ver todo</button>
-                        </div>
-                        <div id="recent-activity-list" class="space-y-4">
-                            <div class="flex items-center justify-center p-8 text-slate-400">
-                                <div class="text-center">
-                                    <i class="ph ph-clock text-3xl mb-2"></i>
-                                    <p class="text-sm">Cargando actividad reciente...</p>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Actionable Activity Table -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-4 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                        <h3 class="text-sm font-semibold text-slate-800">Actividad Reciente & Acciones</h3>
+                        <button onclick="switchView('clients')" class="text-blue-600 text-xs font-medium hover:underline">Ver todos</button>
                     </div>
-
-                    <!-- Quick Action Card -->
-                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl shadow-xl p-8 text-white flex flex-col justify-between relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full transform translate-x-10 -translate-y-10"></div>
-                        <div>
-                            <h2 class="text-lg font-medium mb-2">Nuevo Contrato</h2>
-                            <p class="text-slate-400 text-sm leading-relaxed">Inicie el flujo de generación progresiva para un nuevo cliente.</p>
-                        </div>
-                        <button onclick="router('clients')" class="mt-8 bg-white text-slate-900 py-3 px-4 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors flex items-center justify-center shadow-lg">
-                            <i class="ph-bold ph-plus mr-2"></i> Buscar Cliente
-                        </button>
+                    <div id="dashboard-activity-loading" class="flex justify-center items-center p-8 text-slate-500">
+                        <div class="loader mr-2"></div>
+                        Cargando actividad...
                     </div>
+                    <table id="dashboard-activity-table" class="w-full text-left text-sm hidden">
+                        <thead class="bg-slate-50 text-slate-500 font-medium border-b border-slate-200">
+                            <tr>
+                                <th class="px-4 py-2">Cliente</th>
+                                <th class="px-4 py-2">Proyecto</th>
+                                <th class="px-4 py-2">Estado</th>
+                                <th class="px-4 py-2 text-right">Acción Sugerida</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-activity-body" class="divide-y divide-slate-100">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- VIEW: CLIENT LIST (Integrated with Search) -->
-            <div id="view-clients" class="view-section hidden">
-                <div class="flex justify-between items-end mb-8">
-                    <div>
-                        <h1 class="text-2xl font-light text-slate-900">Clientes</h1>
-                        <p class="text-slate-500 font-light mt-1">Gestión y generación de documentos.</p>
+            <!-- VIEW: CLIENTS (The Workhorse) -->
+            <div id="view-clients" class="hidden space-y-4">
+                <!-- Filters -->
+                <div class="flex flex-wrap gap-2 items-center justify-between">
+                    <h2 class="text-lg font-bold text-slate-800 mr-4">Gestión de Clientes</h2>
+                    <div class="flex gap-2">
+                        <select id="filter-status" class="bg-white border border-slate-300 text-slate-700 text-xs rounded-md px-2 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="all">Todos los estados</option>
+                            <option value="Activo">Activos</option>
+                            <option value="Pendiente">Pendientes</option>
+                            <option value="Completo">Completos</option>
+                        </select>
+                        <button class="bg-white border border-slate-300 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium hover:bg-slate-50 flex items-center">
+                            <i class="ph-bold ph-export mr-1.5"></i> Exportar
+                        </button>
                     </div>
-                    <button class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl flex items-center">
-                        <i class="ph ph-user-plus mr-2"></i> Nuevo Cliente
-                    </button>
                 </div>
 
-                <!-- Search Component Container -->
-                <div class="bg-white rounded-3xl shadow-soft border border-slate-100 overflow-hidden min-h-[400px]">
-                    <!-- Filter Bar -->
-                    <div class="p-4 border-b border-slate-50 flex items-center space-x-2 overflow-x-auto">
-                        <button class="filter-btn active px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium hover:bg-slate-200 transition-colors whitespace-nowrap" onclick="filterClients('all')">Todos</button>
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-white text-slate-500 text-xs font-medium hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors whitespace-nowrap" onclick="filterClients('active')">Activos</button>
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-white text-slate-500 text-xs font-medium hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors whitespace-nowrap" onclick="filterClients('pending')">Pendientes de Contrato</button>
-                        <button class="filter-btn px-4 py-2 rounded-lg bg-white text-slate-500 text-xs font-medium hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors whitespace-nowrap" onclick="filterClients('completed')">Completados</button>
-                    </div>
-
+                <!-- MAIN CLIENT TABLE -->
+                <div class="bg-white border border-slate-200 shadow-sm rounded-lg overflow-hidden">
                     <!-- Loading State -->
-                    <div id="client-loading" class="flex items-center justify-center p-12 hidden">
-                        <div class="text-center">
-                            <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                            <p class="text-slate-500 text-sm">Cargando clientes...</p>
-                        </div>
+                    <div id="client-loading" class="flex justify-center items-center p-8 text-slate-500">
+                        <div class="loader mr-2"></div>
+                        Cargando clientes...
                     </div>
-
-                    <!-- Results Table -->
-                    <div class="w-full" id="client-table-container">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="text-xs text-slate-400 border-b border-slate-50">
-                                    <th class="font-medium py-4 px-6">Cliente / Empresa</th>
-                                    <th class="font-medium py-4 px-6">Proyecto</th>
-                                    <th class="font-medium py-4 px-6">Progreso</th>
-                                    <th class="font-medium py-4 px-6">Estado</th>
-                                    <th class="font-medium py-4 px-6 text-right">Acciones</th>
+                    
+                    <div class="overflow-x-auto">
+                        <table id="client-table" class="w-full text-left text-sm hidden">
+                            <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                                <tr>
+                                    <th class="px-4 py-3 w-64">Cliente / Empresa</th>
+                                    <th class="px-4 py-3 w-32">RFC</th>
+                                    <th class="px-4 py-3">Proyecto</th>
+                                    <th class="px-4 py-3 w-32">Estado</th>
+                                    <th class="px-4 py-3 w-24">Progreso</th>
+                                    <th class="px-4 py-3 text-right w-48">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="client-table-body" class="text-sm">
-                                <!-- Populated by JS -->
+                            <tbody id="client-list-body" class="divide-y divide-slate-100">
+                                <!-- Javascript will inject rows here -->
                             </tbody>
                         </table>
                     </div>
 
                     <!-- Empty State -->
-                    <div id="clients-empty-state" class="hidden flex items-center justify-center p-12">
+                    <div id="clients-empty-state" class="hidden flex justify-center items-center p-12">
                         <div class="text-center">
                             <i class="ph ph-users text-4xl text-slate-300 mb-4"></i>
                             <h3 class="text-lg font-medium text-slate-800 mb-2">No se encontraron clientes</h3>
@@ -554,49 +458,82 @@
     </div>
 
     <script>
-        // === GLOBAL STATE ===
-        let currentView = 'dashboard';
-        let selectedClientId = null;
-        let allClients = [];
-        let filteredClients = [];
-        let currentFilter = 'all';
-        let wizardStep = 1;
+        // === STATE ===
+        let clients = [];
+        let editingId = null; // ID of client currently being edited inline
+        let currentWizClient = null;
         let searchTimeout = null;
-        
-        // === SYSTEM HEALTH & INITIALIZATION ===
+
+        // === CORE FUNCTIONS ===
+        async function init() {
+            await loadClientsFromAPI();
+            renderClients();
+            updateDashboardMetrics();
+            renderDashboardActivity();
+            await checkSystemHealth();
+            
+            // Simulate keyboard shortcut
+            document.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.getElementById('global-search').focus();
+                }
+                if(e.key === 'Escape') {
+                    if(editingId) cancelEdit();
+                    closeWizard();
+                }
+            });
+
+            // Setup global search with debouncing
+            document.getElementById('global-search').addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+                
+                if (searchTimeout) clearTimeout(searchTimeout);
+                
+                searchTimeout = setTimeout(async () => {
+                    if (query.length > 2) {
+                        await searchClientsAPI(query);
+                    } else if (query.length === 0) {
+                        await loadClientsFromAPI();
+                    }
+                }, 300);
+            });
+
+            // Setup filter
+            document.getElementById('filter-status').addEventListener('change', (e) => {
+                filterClientsByStatus(e.target.value);
+            });
+        }
+
         async function checkSystemHealth() {
             try {
                 const response = await fetch('/api/health');
                 const data = await response.json();
                 
-                // Update system status indicator
                 const indicator = document.getElementById('system-status-indicator');
-                if (data.configuration.all_env_vars_configured) {
+                if (data.configuration && data.configuration.all_env_vars_configured) {
                     indicator.innerHTML = `
-                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
-                        Sistema Operativo
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span> 
+                        Online
                     `;
-                    indicator.className = 'flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full';
+                    indicator.className = 'hidden md:flex items-center px-2 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-medium border border-emerald-100';
                 } else {
                     indicator.innerHTML = `
-                        <span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5 animate-pulse"></span>
-                        Configuración Incompleta
+                        <span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5"></span> 
+                        Config. Incompleta
                     `;
-                    indicator.className = 'flex items-center text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full';
+                    indicator.className = 'hidden md:flex items-center px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs font-medium border border-amber-100';
                 }
-
-                // Update dashboard metrics
-                document.getElementById('system-uptime').textContent = `${Math.floor(data.uptime / 60)}m`;
                 
                 return data;
             } catch (error) {
                 console.error('Health check failed:', error);
                 const indicator = document.getElementById('system-status-indicator');
                 indicator.innerHTML = `
-                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span>
-                    Error de Conexión
+                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span> 
+                    Error
                 `;
-                indicator.className = 'flex items-center text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full';
+                indicator.className = 'hidden md:flex items-center px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-medium border border-red-100';
                 return null;
             }
         }
