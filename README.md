@@ -1,7 +1,7 @@
-# ⚖️ Sistema Legal Paralegal - Contratos Progresivos
+# ⚖️ Sistema Legal 3D Pixel Perfection - Contratos Progresivos
 
 ## Descripción
-Sistema legal especializado que genera contratos progresivos profesionales automáticamente desde bases de datos de Notion.
+Sistema legal especializado de **3D Pixel Perfection** que genera contratos progresivos profesionales para servicios de renderizado y visualización 3D automáticamente desde bases de datos de Notion.
 
 ## 🎯 Flujo Principal
 1. **Paralegal** busca cliente por nombre/RFC
@@ -41,7 +41,7 @@ Panel básico mantenido para testing y backup.
 OPENAI_API_KEY=your-openai-api-key-here
 
 # Notion API Configuration
-NOTION_API_KEY=your-notion-integration-token-here
+NOTION_TOKEN=your-notion-integration-token-here
 NOTION_DATABASE_ID=tu-database-id-aqui
 ```
 

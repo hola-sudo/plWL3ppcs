@@ -20,8 +20,7 @@ export default async function handler(
   // Verificar variables de entorno críticas
   const envVars = {
     NOTION_TOKEN: !!process.env.NOTION_TOKEN,
-    NOTION_DATABASE_ID: !!process.env.NOTION_DATABASE_ID,
-    NOTION_API_KEY: !!process.env.NOTION_API_KEY // Legacy support
+    NOTION_DATABASE_ID: !!process.env.NOTION_DATABASE_ID
   };
 
   const allConfigured = Object.values(envVars).every(Boolean);
@@ -38,7 +37,10 @@ export default async function handler(
     uptime: process.uptime(),
     configuration: {
       all_env_vars_configured: allConfigured,
-      details: envVars,
+      details: {
+        NOTION_TOKEN: !!process.env.NOTION_TOKEN,
+        NOTION_DATABASE_ID: !!process.env.NOTION_DATABASE_ID
+      },
       architecture: "Native PDF generation (pdfmake)",
       pdf_generator: "Direct generation - no external storage"
     },
