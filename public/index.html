@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Legal Paralegal - Contratos Progresivos</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 2rem;
+        }
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .feature {
+            padding: 1rem;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .feature h3 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+        }
+        .feature p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .api-info {
+            background: #e8f4ff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        .api-info h3 {
+            margin: 0 0 1rem 0;
+            color: #0066cc;
+        }
+        .endpoint {
+            background: #f0f0f0;
+            padding: 0.5rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+        .status {
+            display: inline-block;
+            background: #00cc44;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .footer {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 0.9rem;
+        }
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .test-button:hover {
+            background: #556cd6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">⚖️ Sistema Legal Paralegal</div>
+        <div class="subtitle">Contratos Progresivos Automatizados - Workflow Inteligente</div>
+        
+        <div class="status">✅ SISTEMA OPERATIVO</div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>📊 Base de Datos Legal</h3>
+                <p>95 campos especializados en Notion para contratos progresivos</p>
+            </div>
+            <div class="feature">
+                <h3>📄 4 Tipos de Documentos</h3>
+                <p>Contrato Base + Anexos B, C y D con herencia automática</p>
+            </div>
+            <div class="feature">
+                <h3>🔄 Workflow Inteligente</h3>
+                <p>Sistema progresivo: Base → Anexo B → Anexo C → Anexo D</p>
+            </div>
+            <div class="feature">
+                <h3>⚡ Generación Instantánea</h3>
+                <p>PDFs generados en menos de 5 segundos con datos heredados</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 2rem 0;">
+            <a href="/legal-dashboard.html" class="test-button primary">⚖️ Dashboard Legal</a>
+            <a href="/contratos" class="test-button">📄 Gestión de Contratos</a>
+        </div>
+
+        <div class="api-info">
+            <h3>🔌 API Endpoints</h3>
+            <div>
+                <strong>Health Check:</strong>
+                <div class="endpoint">GET /api/health</div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <strong>Gestión de Clientes:</strong>
+                <div class="endpoint">GET/POST/PUT /api/legal-clients</div>
+                <small style="color: #666;">
+                    Body: {"NOMBRE_CLIENTE": "string", "CB_NOMBRE_EVENTO": "string", ...}
+                </small>
+            </div>
+            <div style="margin-top: 1rem;">
+                <strong>Generación de Contratos:</strong>
+                <div class="endpoint">GET/POST/PUT /api/legal-contracts</div>
+                <small style="color: #666;">
+                    Body: {"clienteId": "string", "tipoDocumento": "contrato_base|anexo_b|anexo_c|anexo_d"}
+                </small>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Sistema legal desarrollado para generación automática de contratos progresivos</p>
+            <p>Arquitectura Wozniak: Elegante • Eficiente • Escalable</p>
+        </div>
+    </div>
+</body>
+</html>

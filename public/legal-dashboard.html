@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Legal Paralegal - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .clients-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ecf0f1;
+            border-radius: 8px;
+        }
+
+        .client-item {
+            padding: 1rem;
+            border-bottom: 1px solid #ecf0f1;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .client-item:hover {
+            background: #f8f9fa;
+        }
+
+        .client-item:last-child {
+            border-bottom: none;
+        }
+
+        .client-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .client-info {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 0.25rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-active {
+            background: #27ae60;
+        }
+
+        .status-pending {
+            background: #f39c12;
+        }
+
+        .status-draft {
+            background: #95a5a6;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .close:hover {
+            color: #2c3e50;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid #ecf0f1;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .workflow-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .step {
+            text-align: center;
+            flex: 1;
+            padding: 0.5rem;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #bdc3c7;
+            color: white;
+            line-height: 30px;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-active .step-number {
+            background: #3498db;
+        }
+
+        .step-completed .step-number {
+            background: #27ae60;
+        }
+
+        .step-title {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .workflow-steps {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>⚖️ Sistema Legal Paralegal</h1>
+            <p class="subtitle">Gestión de Contratos Progresivos</p>
+            <div class="status-badge">Sistema Operativo</div>
+        </div>
+
+        <!-- Workflow Steps -->
+        <div class="workflow-steps">
+            <div class="step step-completed">
+                <div class="step-number">1</div>
+                <div class="step-title">Contrato Base</div>
+            </div>
+            <div class="step step-active">
+                <div class="step-number">2</div>
+                <div class="step-title">Anexo B</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-title">Anexo C</div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-title">Anexo D</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Clientes Section -->
+            <div class="card">
+                <h2>👥 Gestión de Clientes</h2>
+                
+                <div class="form-group">
+                    <input type="text" id="searchClients" placeholder="Buscar por nombre, empresa o RFC...">
+                </div>
+                
+                <button class="btn btn-success" onclick="openNewClientModal()">
+                    ➕ Nuevo Cliente
+                </button>
+                
+                <button class="btn" onclick="loadClients()">
+                    🔄 Actualizar Lista
+                </button>
+
+                <div class="clients-list" id="clientsList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando clientes...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contratos Section -->
+            <div class="card">
+                <h2>📄 Generación de Contratos</h2>
+                
+                <div class="form-group">
+                    <label>Tipo de Documento:</label>
+                    <select id="documentType">
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="contrato_base">Contrato Base</option>
+                        <option value="anexo_b">Anexo B - Modificaciones</option>
+                        <option value="anexo_c">Anexo C - Entregas/Hitos</option>
+                        <option value="anexo_d">Anexo D - Finalización</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="loadAvailableClients()">
+                    🔍 Ver Clientes Disponibles
+                </button>
+
+                <button class="btn btn-success" onclick="generateContract()">
+                    📄 Generar Contrato
+                </button>
+
+                <div class="clients-list" id="availableClientsList" style="margin-top: 1rem;">
+                    <!-- Clientes disponibles aparecerán aquí -->
+                </div>
+            </div>
+        </div>
+
+        <!-- API Status Card -->
+        <div class="card">
+            <h2>🔧 Estado del Sistema</h2>
+            <p>APIs del sistema legal operativas</p>
+            <button class="btn" onclick="checkHealth()">🏥 Health Check</button>
+            <button class="btn" onclick="testNotionConnection()">📊 Test Notion</button>
+            
+            <div id="systemStatus" style="margin-top: 1rem;">
+                <!-- Estado del sistema aparecerá aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Cliente -->
+    <div id="newClientModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('newClientModal')">&times;</span>
+            <h2>Crear Nuevo Cliente</h2>
+            
+            <form id="newClientForm">
+                <div class="form-group">
+                    <label>Nombre del Cliente:</label>
+                    <input type="text" id="clientName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>RFC:</label>
+                    <input type="text" id="clientRFC">
+                </div>
+                
+                <div class="form-group">
+                    <label>Empresa:</label>
+                    <input type="text" id="clientCompany">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="clientEmail">
+                </div>
+                
+                <div class="form-group">
+                    <label>Teléfono:</label>
+                    <input type="tel" id="clientPhone">
+                </div>
+
+                <h3>Datos del Contrato Base</h3>
+                
+                <div class="form-group">
+                    <label>Nombre del Evento:</label>
+                    <input type="text" id="eventName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Evento (Corto):</label>
+                    <input type="text" id="eventShort">
+                </div>
+                
+                <div class="form-group">
+                    <label>Fecha del Evento:</label>
+                    <input type="date" id="eventDate">
+                </div>
+                
+                <div class="form-group">
+                    <label>Hora del Evento:</label>
+                    <input type="time" id="eventTime">
+                </div>
+                
+                <div class="form-group">
+                    <label>Ubicación:</label>
+                    <input type="text" id="eventLocation">
+                </div>
+                
+                <button type="submit" class="btn btn-success">Crear Cliente</button>
+                <button type="button" class="btn" onclick="closeModal('newClientModal')">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentClients = [];
+        let selectedClient = null;
+
+        // Inicializar dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadClients();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchClients').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                filterClients(searchTerm);
+            });
+
+            // Form submission
+            document.getElementById('newClientForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                createNewClient();
+            });
+
+            // Document type change
+            document.getElementById('documentType').addEventListener('change', function() {
+                const type = this.value;
+                if (type) {
+                    loadAvailableClients();
+                }
+            });
+        }
+
+        async function loadClients() {
+            try {
+                showLoading('clientsList');
+                
+                const response = await fetch('/api/legal-clients');
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentClients = data.data;
+                    displayClients(currentClients);
+                } else {
+                    showError('Error cargando clientes: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error conectando con el servidor: ' + error.message);
+            }
+        }
+
+        function displayClients(clients) {
+            const container = document.getElementById('clientsList');
+            
+            if (clients.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 2rem;">No hay clientes registrados</p>';
+                return;
+            }
+
+            const clientsHTML = clients.map(client => {
+                const statusClass = getStatusClass(client.estadoGeneral);
+                const progress = client.porcentajeCompletado || 0;
+                
+                return `
+                    <div class="client-item" onclick="selectClient('${client.id}')">
+                        <div class="client-name">
+                            <span class="status-indicator ${statusClass}"></span>
+                            ${client.nombre}
+                        </div>
+                        <div class="client-info">
+                            ${client.empresa ? client.empresa + ' • ' : ''}
+                            ${client.rfc || 'Sin RFC'} • 
+                            ${client.ultimoAnexo || 'Sin documentos'} • 
+                            ${progress}% completo
+                        </div>
+                        <div class="client-info">
+                            ${client.documentosPendientes || 'Sin pendientes'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = clientsHTML;
+        }
+
+        function filterClients(searchTerm) {
+            const filtered = currentClients.filter(client => 
+                client.nombre.toLowerCase().includes(searchTerm) ||
+                (client.empresa && client.empresa.toLowerCase().includes(searchTerm)) ||
+                (client.rfc && client.rfc.toLowerCase().includes(searchTerm))
+            );
+            displayClients(filtered);
+        }
+
+        function getStatusClass(status) {
+            if (!status) return 'status-draft';
+            if (status.includes('COMPLETADO')) return 'status-active';
+            if (status.includes('finalización') || status.includes('entregas')) return 'status-pending';
+            return 'status-draft';
+        }
+
+        function selectClient(clientId) {
+            selectedClient = clientId;
+            // Highlight selected client
+            document.querySelectorAll('.client-item').forEach(item => {
+                item.style.background = '';
+            });
+            event.target.closest('.client-item').style.background = '#e3f2fd';
+            
+            console.log('Cliente seleccionado:', clientId);
+        }
+
+        async function loadAvailableClients() {
+            const docType = document.getElementById('documentType').value;
+            if (!docType) return;
+
+            try {
+                showLoading('availableClientsList');
+                
+                const response = await fetch(`/api/legal-contracts?tipo=${docType}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAvailableClients(data.data, docType);
+                } else {
+                    showError('Error cargando clientes disponibles: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+
+        function displayAvailableClients(clients, docType) {
+            const container = document.getElementById('availableClientsList');
+            
+            if (clients.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #7f8c8d; padding: 1rem;">No hay clientes disponibles para ${docType}</p>`;
+                return;
+            }
+
+            const clientsHTML = clients.map(client => `
+                <div class="client-item" onclick="selectClientForContract('${client.id}', '${docType}')">
+                    <div class="client-name">${client.nombre}</div>
+                    <div class="client-info">
+                        ${client.empresa || ''} • ${client.ultimoAnexo || 'Inicial'}
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<h4>Clientes disponibles para ${docType}:</h4>${clientsHTML}`;
+        }
+
+        function selectClientForContract(clientId, docType) {
+            selectedClient = clientId;
+            console.log('Cliente seleccionado para contrato:', clientId, docType);
+            
+            // Highlight selection
+            document.querySelectorAll('#availableClientsList .client-item').forEach(item => {
+                item.style.background = '';
+            });
+            event.target.closest('.client-item').style.background = '#e8f5e8';
+        }
+
+        async function generateContract() {
+            if (!selectedClient) {
+                alert('Por favor selecciona un cliente primero');
+                return;
+            }
+
+            const docType = document.getElementById('documentType').value;
+            if (!docType) {
+                alert('Por favor selecciona un tipo de documento');
+                return;
+            }
+
+            try {
+                showLoading('availableClientsList');
+                
+                const response = await fetch('/api/legal-contracts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        clienteId: selectedClient,
+                        tipoDocumento: docType,
+                        datosDocumento: {}
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`Contrato generado exitosamente para ${data.data.clienteNombre}`);
+                    loadClients(); // Refresh client list
+                    loadAvailableClients(); // Refresh available clients
+                } else {
+                    showError('Error generando contrato: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+
+        function openNewClientModal() {
+            document.getElementById('newClientModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        async function createNewClient() {
+            const formData = {
+                NOMBRE_CLIENTE: document.getElementById('clientName').value,
+                RFC_CLIENTE: document.getElementById('clientRFC').value,
+                EMPRESA_CLIENTE: document.getElementById('clientCompany').value,
+                EMAIL_CLIENTE: document.getElementById('clientEmail').value,
+                TELEFONO_CLIENTE: document.getElementById('clientPhone').value,
+                CB_NOMBRE_EVENTO: document.getElementById('eventName').value,
+                CB_EVENTO: document.getElementById('eventShort').value,
+                CB_FECHA_EVENTO: document.getElementById('eventDate').value,
+                CB_HORA_EVENTO: document.getElementById('eventTime').value,
+                CB_UBICACION: document.getElementById('eventLocation').value
+            };
+
+            try {
+                const response = await fetch('/api/legal-clients', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Cliente creado exitosamente');
+                    closeModal('newClientModal');
+                    loadClients();
+                    // Reset form
+                    document.getElementById('newClientForm').reset();
+                } else {
+                    showError('Error creando cliente: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('systemStatus');
+                statusDiv.innerHTML = `
+                    <h4>Estado del Sistema:</h4>
+                    <p><strong>Servicio:</strong> ${data.service}</p>
+                    <p><strong>Versión:</strong> ${data.version}</p>
+                    <p><strong>Estado:</strong> ${data.status}</p>
+                    <p><strong>Variables configuradas:</strong> ${data.configuration.all_env_vars_configured ? 'Sí' : 'No'}</p>
+                `;
+            } catch (error) {
+                showError('Error verificando estado del sistema: ' + error.message);
+            }
+        }
+
+        async function testNotionConnection() {
+            try {
+                const response = await fetch('/api/legal-clients?query=test');
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Conexión con Notion exitosa ✅');
+                } else {
+                    alert('Error en conexión con Notion: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error testando Notion: ' + error.message);
+            }
+        }
+
+        function showLoading(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <div class="loading" style="display: block;">
+                    <div class="spinner"></div>
+                    <p>Cargando...</p>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            console.error(message);
+            alert(message);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

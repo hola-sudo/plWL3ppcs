@@ -1,0 +1,44 @@
+{
+  "name": "paralegal-contracts-system",
+  "version": "1.0.0",
+  "description": "Sistema de contratos legales progresivos con Notion",
+  "main": "api/contracts.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "vercel dev",
+    "start": "vercel dev",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist",
+    "vercel-build": "echo 'Using serverless functions'"
+  },
+  "keywords": [
+    "legal",
+    "contracts",
+    "notion",
+    "pdf",
+    "workflow",
+    "paralegal"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@notionhq/client": "^2.3.0",
+    "dotenv": "^17.2.3",
+    "pdfmake": "^0.2.9",
+    "zod": "^3.25.76",
+    "uuid": "^9.0.1",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/pdfmake": "^0.2.12",
+    "@types/uuid": "^9.0.6",
+    "@types/cors": "^2.8.15",
+    "@vercel/node": "^5.5.6",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

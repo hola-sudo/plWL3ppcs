@@ -1,0 +1,30 @@
+--- Mejora: Función apiCall estandarizada ---
+// Agregar después de API_ENDPOINTS:
+
+        // STANDARDIZED API CALL FUNCTION
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(endpoint, {
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.success && data.success !== undefined) {
+                    throw new Error(data.error || 'API returned unsuccessful response');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error(`❌ API call failed: ${endpoint}`, error);
+                throw error;
+            }
+        }

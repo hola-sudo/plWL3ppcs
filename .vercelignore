@@ -1,0 +1,9 @@
+node_modules
+.env
+*.log
+.DS_Store
+tmp_*
+dist/
+.git
+README.md
+tsconfig.json
