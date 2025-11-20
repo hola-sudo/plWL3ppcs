@@ -7,7 +7,7 @@
     "build": "tsc --build",
     "dev": "vercel dev",
     "start": "vercel dev",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node test/run-tests.js",
     "clean": "rm -rf dist",
     "vercel-build": "echo 'Using serverless functions'"
   },

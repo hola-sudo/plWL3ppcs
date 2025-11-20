@@ -57,9 +57,27 @@ export class LegalNotionClient {
   async searchClientes(query: string): Promise<LegalClienteBasico[]> {
     try {
       console.log('🔍 Buscando clientes legales en Notion:', query);
+      console.log('🔧 Using database ID:', this.databaseId);
+      
+      // Intentar diferentes formatos del database ID
+      let finalDatabaseId = this.databaseId;
+      
+      // Si tiene guiones, intentar sin guiones primero
+      if (this.databaseId.includes('-')) {
+        finalDatabaseId = this.databaseId.replace(/-/g, '');
+      } 
+      // Si no tiene guiones pero tiene 32 caracteres, agregar guiones
+      else if (this.databaseId.length === 32) {
+        finalDatabaseId = this.databaseId.replace(
+          /^(.{8})(.{4})(.{4})(.{4})(.{12})$/,
+          '$1-$2-$3-$4-$5'
+        );
+      }
+      
+      console.log('🔧 Final database ID:', finalDatabaseId);
       
       const response = await this.notion.databases.query({
-        database_id: this.databaseId,
+        database_id: finalDatabaseId,
         filter: query ? {
           or: [
             {
@@ -677,6 +695,16 @@ export function createLegalNotionClient(): LegalNotionClient {
   if (!apiKey || !databaseId) {
     throw new Error('NOTION_TOKEN y NOTION_DATABASE_ID son requeridos en .env');
   }
+
+  // Validar formato del database ID
+  if (!databaseId.match(/^[a-f0-9]{8}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{12}$/i)) {
+    throw new Error(`NOTION_DATABASE_ID formato inválido. Debe ser un UUID válido. Recibido: ${databaseId}`);
+  }
+
+  console.log('🔧 Configurando Notion client con:', {
+    apiKey: apiKey.substring(0, 10) + '...',
+    databaseId: databaseId
+  });
 
   return new LegalNotionClient({
     apiKey,

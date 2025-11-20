@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Pixel Perfection - Dashboard Legal v4.0.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                ⚖️ Sistema Legal - 3D Pixel Perfection
+            </h1>
+            <p class="text-gray-600">Dashboard Moderno v4.0.0 - Gestión de Contratos Progresivos</p>
+        </div>
+
+        <!-- Status Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">🔧 Estado del Sistema</h3>
+                <div id="system-status" class="text-sm text-gray-600">Verificando...</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">📊 Métricas</h3>
+                <div id="metrics" class="text-sm text-gray-600">Cargando...</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">🎯 Última Actividad</h3>
+                <div id="last-activity" class="text-sm text-gray-600">Sin actividad reciente</div>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">🔍 Búsqueda de Cliente y Generación de Contratos</h2>
+            
+            <!-- Search Form -->
+            <div class="mb-6">
+                <label for="clientSearch" class="block text-sm font-medium text-gray-700 mb-2">
+                    Buscar Cliente (Nombre o RFC)
+                </label>
+                <div class="flex gap-4">
+                    <input 
+                        type="text" 
+                        id="clientSearch" 
+                        class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Ej: Juan Pérez o PERJ800101ABC"
+                    >
+                    <button 
+                        id="searchBtn" 
+                        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                        🔍 Buscar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="searchResults" class="hidden mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">📋 Resultados de Búsqueda</h3>
+                <div id="clientInfo" class="bg-gray-50 rounded-lg p-4"></div>
+                
+                <!-- Contract Generation -->
+                <div class="mt-6">
+                    <h4 class="text-md font-semibold text-gray-900 mb-3">📄 Generar Contrato</h4>
+                    <div class="flex gap-4 flex-wrap">
+                        <button class="contract-btn bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-type="contrato_base">
+                            📋 Contrato Base
+                        </button>
+                        <button class="contract-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-type="anexo_b">
+                            📎 Anexo B
+                        </button>
+                        <button class="contract-btn bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" data-type="anexo_c">
+                            📎 Anexo C
+                        </button>
+                        <button class="contract-btn bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700" data-type="anexo_d">
+                            📎 Anexo D
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading and Status -->
+            <div id="loadingStatus" class="hidden">
+                <div class="text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="mt-2 text-gray-600">Procesando solicitud...</p>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div id="outputSection" class="hidden">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">✅ Resultado</h3>
+                <div id="outputContent" class="bg-gray-50 rounded-lg p-4 font-mono text-sm overflow-x-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentClientId = null;
+
+        // Health Check
+        async function checkSystemHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                document.getElementById('system-status').innerHTML = `
+                    <div class="text-green-600">✅ ${data.status.toUpperCase()}</div>
+                    <div class="text-xs mt-1">Configuración: ${data.configuration.all_env_vars_configured ? 'Completa' : 'Incompleta'}</div>
+                `;
+
+                document.getElementById('metrics').innerHTML = `
+                    <div>Uptime: ${Math.floor(data.uptime / 60)}m</div>
+                    <div>PDF Engine: ${data.integrations.pdf_generator.engine}</div>
+                    <div>Plantillas: ${data.integrations.pdf_generator.templates}</div>
+                `;
+            } catch (error) {
+                document.getElementById('system-status').innerHTML = '<div class="text-red-600">❌ Error de conexión</div>';
+            }
+        }
+
+        // Search Client
+        document.getElementById('searchBtn').addEventListener('click', async () => {
+            const query = document.getElementById('clientSearch').value.trim();
+            if (!query) return;
+
+            showLoading(true);
+            try {
+                const response = await fetch('/api/legal-clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: query })
+                });
+
+                const data = await response.json();
+                showLoading(false);
+
+                if (data.success && data.cliente) {
+                    showClientInfo(data.cliente);
+                    currentClientId = data.cliente.id;
+                } else {
+                    showError(data.error || 'No se encontró el cliente');
+                }
+            } catch (error) {
+                showLoading(false);
+                showError('Error en la búsqueda: ' + error.message);
+            }
+        });
+
+        // Generate Contract
+        document.querySelectorAll('.contract-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!currentClientId) return;
+
+                const documentType = btn.dataset.type;
+                showLoading(true);
+
+                try {
+                    const response = await fetch('/api/legal-contracts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            clienteId: currentClientId,
+                            tipoDocumento: documentType
+                        })
+                    });
+
+                    const data = await response.json();
+                    showLoading(false);
+
+                    if (data.success) {
+                        showOutput(`✅ Contrato generado exitosamente!\n\nTipo: ${documentType}\nCliente: ${data.cliente?.NOMBRE_CLIENTE || 'N/A'}\nEvento: ${data.cliente?.CB_NOMBRE_EVENTO || 'N/A'}\n\nPDF generado con ${data.totalFields || 0} campos procesados.`);
+                        document.getElementById('last-activity').innerHTML = `
+                            <div>Último: ${documentType}</div>
+                            <div class="text-xs text-gray-500">${new Date().toLocaleTimeString()}</div>
+                        `;
+                    } else {
+                        showError(data.error || 'Error generando contrato');
+                    }
+                } catch (error) {
+                    showLoading(false);
+                    showError('Error: ' + error.message);
+                }
+            });
+        });
+
+        // Helper functions
+        function showClientInfo(cliente) {
+            document.getElementById('clientInfo').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <strong>Cliente:</strong> ${cliente.NOMBRE_CLIENTE || 'N/A'}<br>
+                        <strong>RFC:</strong> ${cliente.RFC || 'N/A'}<br>
+                        <strong>Email:</strong> ${cliente.EMAIL || 'N/A'}
+                    </div>
+                    <div>
+                        <strong>Evento:</strong> ${cliente.CB_NOMBRE_EVENTO || 'N/A'}<br>
+                        <strong>Fecha:</strong> ${cliente.FECHA_EVENTO || 'N/A'}<br>
+                        <strong>Estado:</strong> ${cliente.Estado || 'N/A'}
+                    </div>
+                </div>
+            `;
+            document.getElementById('searchResults').classList.remove('hidden');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingStatus').classList.toggle('hidden', !show);
+        }
+
+        function showOutput(content) {
+            document.getElementById('outputContent').textContent = content;
+            document.getElementById('outputSection').classList.remove('hidden');
+        }
+
+        function showError(error) {
+            showOutput('❌ Error: ' + error);
+        }
+
+        // Initialize
+        checkSystemHealth();
+        setInterval(checkSystemHealth, 30000); // Refresh every 30 seconds
+    </script>
+</body>
+</html>
