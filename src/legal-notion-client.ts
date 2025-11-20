@@ -52,7 +52,7 @@ export class LegalNotionClient {
   }
 
   /**
-   * Busca clientes por nombre, empresa o RFC
+   * Busca clientes por nombre, empresa o RFC (tolerante a acentos y mayúsculas)
    */
   async searchClientes(query: string): Promise<LegalClienteBasico[]> {
     try {
@@ -76,51 +76,80 @@ export class LegalNotionClient {
       
       console.log('🔧 Final database ID:', finalDatabaseId);
       
-      const response = await this.notion.databases.query({
-        database_id: finalDatabaseId,
-        filter: query ? {
-          or: [
+      // Si no hay query, obtener todos los clientes
+      if (!query || query.trim() === '') {
+        console.log('📋 Obteniendo todos los clientes');
+        const response = await this.notion.databases.query({
+          database_id: finalDatabaseId,
+          page_size: 50,
+          sorts: [
             {
               property: 'NOMBRE_CLIENTE',
-              rich_text: {
-                contains: query
-              }
-            },
-            {
-              property: 'EMPRESA_CLIENTE',
-              rich_text: {
-                contains: query
-              }
-            },
-            {
-              property: 'RFC_CLIENTE',
-              rich_text: {
-                contains: query
-              }
+              direction: 'ascending'
             }
           ]
-        } : undefined,
-        page_size: 20
+        });
+        return this.mapToLegalClienteBasico(response.results);
+      }
+
+      // Normalizar query para búsqueda flexible
+      const normalizedQuery = this.normalizeSearchText(query.trim());
+      console.log('🔍 Query normalizado:', normalizedQuery);
+
+      // Crear múltiples variaciones del texto de búsqueda
+      const searchVariations = this.getSearchVariations(query.trim());
+      console.log('🔄 Variaciones de búsqueda:', searchVariations);
+
+      // Construir filtros flexibles
+      const searchFilters: any[] = [];
+
+      // Agregar filtros para cada variación
+      searchVariations.forEach(variation => {
+        searchFilters.push(
+          {
+            property: 'NOMBRE_CLIENTE',
+            rich_text: { contains: variation }
+          },
+          {
+            property: 'EMPRESA_CLIENTE', 
+            rich_text: { contains: variation }
+          },
+          {
+            property: 'RFC_CLIENTE',
+            rich_text: { contains: variation }
+          }
+        );
       });
 
-      const clientes: LegalClienteBasico[] = response.results.map((page: any) => {
-        const props = page.properties;
-        
-        return {
-          id: page.id,
-          nombre: this.extractTextProperty(props.NOMBRE_CLIENTE) || '',
-          empresa: this.extractTextProperty(props.EMPRESA_CLIENTE) || '',
-          rfc: this.extractTextProperty(props.RFC_CLIENTE) || '',
-          email: this.extractTextProperty(props.EMAIL_CLIENTE) || '',
-          telefono: this.extractTextProperty(props.TELEFONO_CLIENTE) || '',
-          estadoGeneral: this.extractFormulaProperty(props.ESTADO_GENERAL) || '',
-          ultimoAnexo: this.extractSelectProperty(props.ULTIMO_ANEXO_GENERADO) || '',
-          documentosPendientes: this.extractFormulaProperty(props.DOCUMENTOS_PENDIENTES) || '',
-          porcentajeCompletado: this.extractFormulaProperty(props.PORCENTAJE_COMPLETADO) || 0
-        };
+      const response = await this.notion.databases.query({
+        database_id: finalDatabaseId,
+        filter: {
+          or: searchFilters
+        },
+        page_size: 50
       });
 
-      console.log(`✅ Encontrados ${clientes.length} clientes`);
+      let clientes = this.mapToLegalClienteBasico(response.results);
+
+      // Filtro adicional en memoria para mayor precisión
+      if (normalizedQuery.length > 2) {
+        clientes = clientes.filter(cliente => {
+          const nombreNorm = this.normalizeSearchText(cliente.nombre || '');
+          const empresaNorm = this.normalizeSearchText(cliente.empresa || '');
+          const rfcNorm = this.normalizeSearchText(cliente.rfc || '');
+          
+          return nombreNorm.includes(normalizedQuery) ||
+                 empresaNorm.includes(normalizedQuery) ||
+                 rfcNorm.includes(normalizedQuery) ||
+                 this.fuzzyMatch(nombreNorm, normalizedQuery) ||
+                 this.fuzzyMatch(empresaNorm, normalizedQuery);
+        });
+      }
+
+      // Ordenar por relevancia
+      clientes = this.sortByRelevance(clientes, normalizedQuery);
+
+      console.log(`✅ Encontrados ${clientes.length} clientes con búsqueda flexible`);
       return clientes;
       
     } catch (error: any) {
@@ -512,6 +541,124 @@ export class LegalNotionClient {
   }
 
   // === MÉTODOS HELPER PRIVADOS ===
+
+  /**
+   * Normaliza texto removiendo acentos y convirtiendo a minúsculas
+   */
+  private normalizeSearchText(text: string): string {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+      .replace(/[^\w\s]/g, '') // Remover caracteres especiales
+      .replace(/\s+/g, ' ') // Normalizar espacios
+      .trim();
+  }
+
+  /**
+   * Genera variaciones del texto de búsqueda para mayor tolerancia
+   */
+  private getSearchVariations(query: string): string[] {
+    const variations = new Set<string>();
+    
+    // Original
+    variations.add(query);
+    
+    // Minúsculas
+    variations.add(query.toLowerCase());
+    
+    // Mayúsculas
+    variations.add(query.toUpperCase());
+    
+    // Primera letra mayúscula
+    variations.add(query.charAt(0).toUpperCase() + query.slice(1).toLowerCase());
+    
+    // Sin acentos
+    const normalized = this.normalizeSearchText(query);
+    variations.add(normalized);
+    
+    // Palabras individuales (si hay espacios)
+    if (query.includes(' ')) {
+      const words = query.split(' ').filter(w => w.length > 2);
+      words.forEach(word => {
+        variations.add(word);
+        variations.add(word.toLowerCase());
+        variations.add(this.normalizeSearchText(word));
+      });
+    }
+    
+    // Remover strings muy cortos (menos de 2 caracteres)
+    return Array.from(variations).filter(v => v.length >= 2);
+  }
+
+  /**
+   * Búsqueda difusa (fuzzy matching) simple
+   */
+  private fuzzyMatch(text: string, query: string): boolean {
+    if (query.length < 3) return false;
+    
+    // Búsqueda de subsequencia
+    let queryIndex = 0;
+    for (let i = 0; i < text.length && queryIndex < query.length; i++) {
+      if (text[i] === query[queryIndex]) {
+        queryIndex++;
+      }
+    }
+    
+    // Si encontramos al menos 70% de los caracteres en orden
+    return queryIndex / query.length >= 0.7;
+  }
+
+  /**
+   * Ordena resultados por relevancia
+   */
+  private sortByRelevance(clientes: LegalClienteBasico[], query: string): LegalClienteBasico[] {
+    return clientes.sort((a, b) => {
+      const scoreA = this.calculateRelevanceScore(a, query);
+      const scoreB = this.calculateRelevanceScore(b, query);
+      return scoreB - scoreA; // Orden descendente (mayor relevancia primero)
+    });
+  }
+
+  /**
+   * Calcula score de relevancia para ordenamiento
+   */
+  private calculateRelevanceScore(cliente: LegalClienteBasico, query: string): number {
+    const normalizedQuery = this.normalizeSearchText(query);
+    let score = 0;
+    
+    const nombre = this.normalizeSearchText(cliente.nombre || '');
+    const empresa = this.normalizeSearchText(cliente.empresa || '');
+    const rfc = this.normalizeSearchText(cliente.rfc || '');
+    
+    // Coincidencia exacta = mayor score
+    if (nombre === normalizedQuery) score += 100;
+    if (empresa === normalizedQuery) score += 90;
+    if (rfc === normalizedQuery) score += 95;
+    
+    // Comienza con query
+    if (nombre.startsWith(normalizedQuery)) score += 80;
+    if (empresa.startsWith(normalizedQuery)) score += 70;
+    if (rfc.startsWith(normalizedQuery)) score += 85;
+    
+    // Contiene query
+    if (nombre.includes(normalizedQuery)) score += 50;
+    if (empresa.includes(normalizedQuery)) score += 40;
+    if (rfc.includes(normalizedQuery)) score += 60;
+    
+    // Fuzzy match
+    if (this.fuzzyMatch(nombre, normalizedQuery)) score += 30;
+    if (this.fuzzyMatch(empresa, normalizedQuery)) score += 25;
+    
+    // Bonus por palabras individuales
+    const queryWords = normalizedQuery.split(' ').filter(w => w.length > 2);
+    queryWords.forEach(word => {
+      if (nombre.includes(word)) score += 20;
+      if (empresa.includes(word)) score += 15;
+    });
+    
+    return score;
+  }
 
   private buildAnexoB(props: any): Partial<AnexoB> | undefined {
     const estado = this.extractSelectProperty(props.ANEXO_B_ESTADO);
