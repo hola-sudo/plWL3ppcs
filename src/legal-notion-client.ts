@@ -703,17 +703,14 @@ export function createLegalNotionClient(): LegalNotionClient {
   if (!cleanDatabaseId.match(/^[a-f0-9]{8}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{12}$/i)) {
     throw new Error(`NOTION_DATABASE_ID formato inválido. Debe ser un UUID válido. Recibido: ${cleanDatabaseId}`);
   }
-  
-  // Usar el ID limpio
-  databaseId = cleanDatabaseId;
 
   console.log('🔧 Configurando Notion client con:', {
     apiKey: apiKey.substring(0, 10) + '...',
-    databaseId: databaseId
+    databaseId: cleanDatabaseId
   });
 
   return new LegalNotionClient({
     apiKey,
-    databaseId
+    databaseId: cleanDatabaseId
   });
 }
