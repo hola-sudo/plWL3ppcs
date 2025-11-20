@@ -21,8 +21,15 @@ import {
   AnexoD 
 } from './legal-schemas';
 
-// Configurar fuentes para PDFMake - CORRECCIÓN WOZ
-(pdfMake as any).vfs = (pdfFonts as any).pdfMake.vfs;
+// Configurar fuentes para PDFMake - CORRECCIÓN PRODUCCIÓN
+if (typeof (pdfFonts as any).pdfMake !== 'undefined' && (pdfFonts as any).pdfMake.vfs) {
+  (pdfMake as any).vfs = (pdfFonts as any).pdfMake.vfs;
+} else if ((pdfFonts as any).vfs) {
+  (pdfMake as any).vfs = (pdfFonts as any).vfs;
+} else {
+  // Fallback para entornos serverless
+  console.warn('⚠️ PDFMake vfs no encontrado, usando configuración básica');
+}
 
 export interface LegalPDFOptions {
   tipoDocumento: TipoDocumento;

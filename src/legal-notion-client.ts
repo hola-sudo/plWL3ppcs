@@ -696,10 +696,16 @@ export function createLegalNotionClient(): LegalNotionClient {
     throw new Error('NOTION_TOKEN y NOTION_DATABASE_ID son requeridos en .env');
   }
 
+  // Limpiar database ID (remover query parameters si existen)
+  const cleanDatabaseId = databaseId.split('?')[0];
+  
   // Validar formato del database ID
-  if (!databaseId.match(/^[a-f0-9]{8}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{12}$/i)) {
-    throw new Error(`NOTION_DATABASE_ID formato inválido. Debe ser un UUID válido. Recibido: ${databaseId}`);
+  if (!cleanDatabaseId.match(/^[a-f0-9]{8}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{12}$/i)) {
+    throw new Error(`NOTION_DATABASE_ID formato inválido. Debe ser un UUID válido. Recibido: ${cleanDatabaseId}`);
   }
+  
+  // Usar el ID limpio
+  databaseId = cleanDatabaseId;
 
   console.log('🔧 Configurando Notion client con:', {
     apiKey: apiKey.substring(0, 10) + '...',
