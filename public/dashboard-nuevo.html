@@ -130,18 +130,24 @@
 
             showLoading(true);
             try {
-                const response = await fetch('/api/legal-clients', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: query })
+                const response = await fetch(`/api/legal-clients?query=${encodeURIComponent(query)}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
                 const data = await response.json();
                 showLoading(false);
 
-                if (data.success && data.cliente) {
-                    showClientInfo(data.cliente);
-                    currentClientId = data.cliente.id;
+                if (data.success && data.data && data.data.length > 0) {
+                    // Usar el primer resultado
+                    const cliente = data.data[0];
+                    showClientInfo(cliente);
+                    currentClientId = cliente.id;
+                    
+                    // Mostrar todos los resultados si hay múltiples
+                    if (data.data.length > 1) {
+                        showOutput(`✅ Encontrados ${data.data.length} clientes. Mostrando el primero: ${cliente.nombre || cliente.NOMBRE_CLIENTE}`);
+                    }
                 } else {
                     showError(data.error || 'No se encontró el cliente');
                 }
@@ -193,14 +199,14 @@
             document.getElementById('clientInfo').innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <strong>Cliente:</strong> ${cliente.NOMBRE_CLIENTE || 'N/A'}<br>
-                        <strong>RFC:</strong> ${cliente.RFC || 'N/A'}<br>
-                        <strong>Email:</strong> ${cliente.EMAIL || 'N/A'}
+                        <strong>Cliente:</strong> ${cliente.nombre || cliente.NOMBRE_CLIENTE || 'N/A'}<br>
+                        <strong>RFC:</strong> ${cliente.rfc || cliente.RFC || 'N/A'}<br>
+                        <strong>Email:</strong> ${cliente.email || cliente.EMAIL || 'N/A'}
                     </div>
                     <div>
-                        <strong>Evento:</strong> ${cliente.CB_NOMBRE_EVENTO || 'N/A'}<br>
-                        <strong>Fecha:</strong> ${cliente.FECHA_EVENTO || 'N/A'}<br>
-                        <strong>Estado:</strong> ${cliente.Estado || 'N/A'}
+                        <strong>Empresa:</strong> ${cliente.empresa || cliente.EMPRESA_CLIENTE || 'N/A'}<br>
+                        <strong>Teléfono:</strong> ${cliente.telefono || cliente.TELEFONO || 'N/A'}<br>
+                        <strong>Estado:</strong> ${cliente.estadoGeneral || cliente.Estado || 'N/A'}
                     </div>
                 </div>
             `;
